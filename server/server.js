@@ -17,31 +17,49 @@ const io = new Server(server, {
 });
 
 let currentWord = 'cat';
+const roomWords = {};
+
 io.on('connection', (socket) => {
    console.log('A user connected:', socket.id);
 
+   socket.on('joinRoom', (roomId) => {
+      socket.join(roomId);
+      console.log(`User ${socket.id} joined room: ${roomId}`);
+   });
+
    socket.on ('startDrawing', (data) => {
-      socket.broadcast.emit('startDrawing', data);
-   })
+      console.log(data);
+      const roomId = data.roomId;
+      const username = data.username;
+      console.log(`User ${username} started drawing in room: ${roomId}`);
+      socket.to(roomId).emit('startDrawing', data);
+   });
    socket.on('draw', (data) => {
-      socket.broadcast.emit('draw', data);
-   })
+      const roomId = data.roomId;
+      const username = data.username;
+      console.log(`User ${username} is drawing in room: ${roomId}`);
+      socket.to(roomId).emit('draw', data);
+   });
 
-   socket.on('clear', () => {
-      socket.broadcast.emit('clear');
-   })
+   socket.on('clear', (data) => {
+      const roomId = data.roomId;
+      const username = data.username;
+      socket.to(roomId).emit('clear', data);
+   });
 
-   socket.on('stopDrawing', () => {
-      socket.broadcast.emit('stopDrawing');
+   socket.on('stopDrawing', (data) => {
+      const roomId = data.roomId;
+      const username = data.username;
+      socket.to(roomId).emit('stopDrawing', data);
    });
    
-   socket.on('chatMessage', ({ username, message }) => {
+   socket.on('chatMessage', ({ username, message, roomId }) => {
       const isCorrect = message.trim().toLowerCase() === currentWord.toLowerCase();
       if(isCorrect) {
          socket.to(socket.id).emit('guessResult', { username, message, success: true });
-         socket.broadcast.emit('systemMessage', `${username} guessed the word correctly!`);
+         socket.to(roomId).emit('systemMessage', `${username} guessed the word correctly!`);
       } else {
-         socket.broadcast.emit('chatMessage', { username, message });
+         socket.to(roomId).emit('chatMessage', { username, message });
       }
    });
 
