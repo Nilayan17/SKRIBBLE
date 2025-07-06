@@ -16,28 +16,31 @@ const io = new Server(server, {
    }
 });
 
-let currentWord = 'cat';
-const roomWords = {};
+const {joinRoom, startGame, handleGuess} = require('./gameController');
 
 io.on('connection', (socket) => {
    console.log('A user connected:', socket.id);
+   
+   socket.on('joinRoom', (data) => {
+      const {roomId, username} = data;
+      joinRoom(io,socket,roomId,username);
+   });
 
-   socket.on('joinRoom', (roomId) => {
-      socket.join(roomId);
-      console.log(`User ${socket.id} joined room: ${roomId}`);
+   socket.on('startGame', (roomId) => {
+      startGame(io, roomId);
    });
 
    socket.on ('startDrawing', (data) => {
       console.log(data);
       const roomId = data.roomId;
       const username = data.username;
-      console.log(`User ${username} started drawing in room: ${roomId}`);
+      // console.log(`User ${username} started drawing in room: ${roomId}`);
       socket.to(roomId).emit('startDrawing', data);
    });
    socket.on('draw', (data) => {
       const roomId = data.roomId;
       const username = data.username;
-      console.log(`User ${username} is drawing in room: ${roomId}`);
+      // console.log(`User ${username} is drawing in room: ${roomId}`);
       socket.to(roomId).emit('draw', data);
    });
 
@@ -53,14 +56,9 @@ io.on('connection', (socket) => {
       socket.to(roomId).emit('stopDrawing', data);
    });
    
-   socket.on('chatMessage', ({ username, message, roomId }) => {
-      const isCorrect = message.trim().toLowerCase() === currentWord.toLowerCase();
-      if(isCorrect) {
-         socket.to(socket.id).emit('guessResult', { username, message, success: true });
-         socket.to(roomId).emit('systemMessage', `${username} guessed the word correctly!`);
-      } else {
-         socket.to(roomId).emit('chatMessage', { username, message });
-      }
+   socket.on('chatMessage', (data) => {
+      console.log(data);
+      handleGuess(io, socket, data.username, data.msg, data.roomId);
    });
 
    socket.on('disconnect', () => {

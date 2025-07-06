@@ -23,8 +23,8 @@ const Canvas = ({roomId, username}) => {
       context.lineWidth = 3;
       contextRef.current = context;
 
-      socket.emit('joinRoom', roomId);
-
+      socket.emit('joinRoom', {roomId,username});
+      
       socket.on('startDrawing', (data) => {
          const {offsetX, offsetY} = data;
          contextRef.current.beginPath();
