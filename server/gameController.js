@@ -52,7 +52,7 @@ function startGame(io, roomId) {
 function startRound(io, roomId) {
   const room = rooms[roomId];
   if (!room) return;
-
+  io.to(roomId).emit('clear', {roomId});
   const drawer = room.users[room.currentDrawerIndex];
   room.currentWord = getRandomWord();
   room.gameState = 'drawing';
@@ -60,6 +60,7 @@ function startRound(io, roomId) {
 
   io.to(drawer.id).emit('yourTurnToDraw', room.currentWord);
   io.to(roomId).emit('systemMessage', `${drawer.username} is drawing!`);
+  setTimeout(() => endRound(io, roomId), 30000);
 }
 
 function handleGuess(io, socket, username, message, roomId) {
@@ -68,7 +69,8 @@ function handleGuess(io, socket, username, message, roomId) {
   if (!room) return;
 
   const isCorrect = message.trim().toLowerCase() === room.currentWord.toLowerCase();
-
+  const drawer = room.users[room.currentDrawerIndex];
+  if(drawer.username === username) return;
   if (isCorrect && !room.guessedUsers.has(socket.id)) {
     room.guessedUsers.add(socket.id);
     const player = room.users.find(u => u.id === socket.id);
@@ -93,7 +95,7 @@ function handleGuess(io, socket, username, message, roomId) {
 function endRound(io, roomId) {
   const room = rooms[roomId];
   if (!room) return;
-
+  io.to(roomId).emit('clear', {roomId});
   room.currentDrawerIndex++;
   if (room.currentDrawerIndex >= room.users.length) {
     room.round++;
@@ -106,7 +108,7 @@ function endRound(io, roomId) {
     endGame(io, roomId);
   } else {
     io.to(roomId).emit('systemMessage', `Next round starting...`);
-    setTimeout(() => startRound(io, roomId), 3000);
+    setTimeout(() => startRound(io, roomId), 2000);
   }
 }
 
@@ -136,5 +138,6 @@ module.exports = {
   handleGuess,
   endGame,
   endRound,
-  removeUser
+  removeUser,
+  rooms
  };

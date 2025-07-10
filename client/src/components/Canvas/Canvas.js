@@ -59,10 +59,10 @@ const Canvas = ({roomId, username}) => {
    const startDrawing = ({nativeEvent}) => {
       console.log("attempting to draw");
       const {offsetX, offsetY} = nativeEvent;
-      contextRef.current.beginPath();
-      contextRef.current.moveTo(offsetX, offsetY);
-      contextRef.current.lineTo(offsetX, offsetY);
-      contextRef.current.stroke();
+      // contextRef.current.beginPath();
+      // contextRef.current.moveTo(offsetX, offsetY);
+      // contextRef.current.lineTo(offsetX, offsetY);
+      // contextRef.current.stroke();
       setIsDrawing(true);
       socket.emit('startDrawing', 
          {offsetX, offsetY, roomId , username});
@@ -73,23 +73,23 @@ const Canvas = ({roomId, username}) => {
          return;
       }
       const {offsetX, offsetY} = nativeEvent;
-      contextRef.current.lineTo(offsetX, offsetY);
-      contextRef.current.stroke();
-      contextRef.current.beginPath();
-      contextRef.current.moveTo(offsetX, offsetY);
+      // contextRef.current.lineTo(offsetX, offsetY);
+      // contextRef.current.stroke();
+      // contextRef.current.beginPath();
+      // contextRef.current.moveTo(offsetX, offsetY);
       socket.emit('draw', {offsetX, offsetY, roomId , username});
    };
 
    const stopDrawing = () => {
-      contextRef.current.closePath();
+      // contextRef.current.closePath();
       setIsDrawing(false);
       socket.emit('stopDrawing', {roomId , username});
    };
 
    const clearCanvas = () => {
       const canvas = canvasRef.current;
-      contextRef.current.clearRect(0, 0, canvas.width, canvas.height);
-      socket.emit('clear', {roomId , username});
+      // contextRef.current.clearRect(0, 0, canvas.width, canvas.height);
+      socket.emit('clear', {roomId});
    }
 
    return (

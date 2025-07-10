@@ -16,7 +16,7 @@ const io = new Server(server, {
    }
 });
 
-const {joinRoom, startGame, handleGuess} = require('./gameController');
+const {rooms, joinRoom, startGame, handleGuess} = require('./gameController');
 
 io.on('connection', (socket) => {
    console.log('A user connected:', socket.id);
@@ -34,28 +34,52 @@ io.on('connection', (socket) => {
       console.log('recieved from server');
       console.log(data);
       const roomId = data.roomId;
-      console.log(roomId);
-      const username = data.username;
+      // console.log(roomId);
+      
       // console.log(`User ${username} started drawing in room: ${roomId}`);
-      socket.to(roomId).emit('startDrawing', data);
+      if(rooms) {
+         console.log(rooms[roomId]);
+         const drawerindex = rooms[roomId].currentDrawerIndex;
+         console.log(drawerindex);
+         console.log("username = ", data.username);
+         console.log("drawerindex = ", drawerindex);
+         console.log("rooms[roomId].users[drawerindex] = ", rooms[roomId].users[drawerindex]);
+         if(data.username === rooms[roomId].users[drawerindex].username) {
+            console.log("YES");
+            io.to(roomId).emit('startDrawing', data);
+         }
+      }
    });
    socket.on('draw', (data) => {
       const roomId = data.roomId;
       const username = data.username;
       // console.log(`User ${username} is drawing in room: ${roomId}`);
-      socket.to(roomId).emit('draw', data);
+      if(rooms) {
+         const drawerindex = rooms[roomId].currentDrawerIndex;
+         if(username === rooms[roomId].users[drawerindex].username) {
+            console.log("YES");
+            io.to(roomId).emit('draw', data);
+         }
+      }
+      // socket.to(roomId).emit('draw', data);
    });
 
    socket.on('clear', (data) => {
       const roomId = data.roomId;
-      const username = data.username;
-      socket.to(roomId).emit('clear', data);
+      io.to(roomId).emit('clear', data);
    });
 
    socket.on('stopDrawing', (data) => {
       const roomId = data.roomId;
       const username = data.username;
-      socket.to(roomId).emit('stopDrawing', data);
+      if(rooms[roomId]){ 
+         const drawerindex = rooms[roomId].currentDrawerIndex;
+         if(username === rooms[roomId].users[drawerindex].username) {
+            console.log("YES");
+            io.to(roomId).emit('stopDrawing', data);
+         }
+      }
+      // socket.to(roomId).emit('stopDrawing', data);
    });
    
    socket.on('chatMessage', (data) => {
