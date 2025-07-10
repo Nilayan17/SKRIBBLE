@@ -26,6 +26,7 @@ const Canvas = ({roomId, username}) => {
       socket.emit('joinRoom', {roomId,username});
       
       socket.on('startDrawing', (data) => {
+         console.log('serving you');
          const {offsetX, offsetY} = data;
          contextRef.current.beginPath();
          contextRef.current.moveTo(offsetX, offsetY);
@@ -53,7 +54,7 @@ const Canvas = ({roomId, username}) => {
          socket.off('stopDrawing');
          socket.off('clear');
       };
-   }, [roomId]);
+   }, [roomId, username]);
 
    const startDrawing = ({nativeEvent}) => {
       console.log("attempting to draw");

@@ -31,8 +31,10 @@ io.on('connection', (socket) => {
    });
 
    socket.on ('startDrawing', (data) => {
+      console.log('recieved from server');
       console.log(data);
       const roomId = data.roomId;
+      console.log(roomId);
       const username = data.username;
       // console.log(`User ${username} started drawing in room: ${roomId}`);
       socket.to(roomId).emit('startDrawing', data);

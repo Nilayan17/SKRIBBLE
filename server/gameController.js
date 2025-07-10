@@ -19,24 +19,31 @@ function joinRoom(io, socket, roomId, username) {
       currentWord: '',
       gameState: 'waiting',
       round: 0,
-      maxRounds: 3,
+      maxRounds: 2,
       guessedUsers: new Set()
     };
   }
-
-  const alreadyInRoom = rooms[roomId].users.some(u => u.id === socket.id);
+  console.log(rooms[roomId].users);
+  socket.join(roomId);
+  const alreadyInRoom = rooms[roomId].users.some(u => u.username === username);
+  if(alreadyInRoom) {
+    return;
+  }
+  console.log(`user ${username}`, {alreadyInRoom});
   if (!alreadyInRoom) {
     rooms[roomId].users.push({ id: socket.id, username, score: 0 });
   }
-
-  socket.join(roomId);
   io.to(roomId).emit('updateUsers', rooms[roomId].users);
 }
 
 function startGame(io, roomId) {
   const room = rooms[roomId];
   if (!room) return;
-
+  if(room.users.length < 2) {
+    io.to(roomId).emit('systemMessage', 'Need atleast 2 players to start the game!');
+    return;
+  }
+  io.to(roomId).emit('systemMessage', 'Game has started!');
   room.round = 1;
   room.currentDrawerIndex = 0;
   startRound(io, roomId);
@@ -75,7 +82,10 @@ function handleGuess(io, socket, username, message, roomId) {
     socket.to(roomId).emit('chatMessage', { username, message, roomId });
   }
 
+  console.log(room.guessedUsers.size);
+  console.log(room.users.length);
   if (room.guessedUsers.size === room.users.length - 1) {
+    console.log("round should be over");
     setTimeout(() => endRound(io, roomId), 2000);
   }
 }
@@ -89,8 +99,10 @@ function endRound(io, roomId) {
     room.round++;
     room.currentDrawerIndex = 0;
   }
-
-  if (room.round > room.maxRounds) {
+  console.log(room.maxRounds);
+  console.log(room.round);
+  if (room.round >= room.maxRounds) {
+    console.log('hello');
     endGame(io, roomId);
   } else {
     io.to(roomId).emit('systemMessage', `Next round starting...`);
