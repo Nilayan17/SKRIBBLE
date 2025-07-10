@@ -2,12 +2,13 @@ import React, { useState } from "react";
 
 const Chatbox = ({ messages, onSendMessage }) => {
   const [message, setMessage] = useState("");
-
+  const [sendTo, setsendTo] = useState("Everyone");
   const sendMessage = (e) => {
     e.preventDefault();
     if (message.trim() === "") return;
-    onSendMessage(message);
+    onSendMessage(message, sendTo);
     setMessage("");
+    setsendTo("Everyone");
   };
 
   return (
@@ -31,6 +32,15 @@ const Chatbox = ({ messages, onSendMessage }) => {
           )
         )}
       </div>
+      <form>
+        <input
+          type="text"
+          placeholder="Everyone"
+          style={{ width: '300px', padding: '10px', marginRight: '10px' }}
+          value={sendTo}
+          onChange={(e) => setsendTo(e.target.value)}
+        />
+      </form>
       <form onSubmit={sendMessage}>
         <input
           type="text"
@@ -41,6 +51,7 @@ const Chatbox = ({ messages, onSendMessage }) => {
         />
         <button type="submit">Submit</button>
       </form>
+
     </div>
   );
 };

@@ -70,6 +70,7 @@ function handleGuess(io, socket, username, message, roomId) {
 
   const isCorrect = message.trim().toLowerCase() === room.currentWord.toLowerCase();
   const drawer = room.users[room.currentDrawerIndex];
+  const sendTo = "Everyone";
   if(drawer.username === username) return;
   if (isCorrect && !room.guessedUsers.has(socket.id)) {
     room.guessedUsers.add(socket.id);
@@ -81,7 +82,7 @@ function handleGuess(io, socket, username, message, roomId) {
     io.to(roomId).emit('guessResult', { username:username, success:true });
     // socket.to(roomId).emit('systemMessage', `${username} guessed correctly!`);
   } else {
-    socket.to(roomId).emit('chatMessage', { username, message, roomId });
+    socket.to(roomId).emit('chatMessage', { username, message, roomId, sendTo });
   }
 
   console.log(room.guessedUsers.size);

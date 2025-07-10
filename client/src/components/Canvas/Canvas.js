@@ -87,7 +87,7 @@ const Canvas = ({roomId, username}) => {
    };
 
    const clearCanvas = () => {
-      const canvas = canvasRef.current;
+      // const canvas = canvasRef.current;
       // contextRef.current.clearRect(0, 0, canvas.width, canvas.height);
       socket.emit('clear', {roomId});
    }

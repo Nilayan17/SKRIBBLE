@@ -39,7 +39,15 @@ const Game = ({ username, roomId }) => {
       }
     });
 
-    socket.on('chatMessage', ({ username, message, roomId}) => {
+    socket.on('chatMessage', (data) => {
+      // console.log('received from server');
+      // console.log("hello");
+      // console.log('roomId = ', roomId);
+      // console.log("username = ", username);
+      // console.log("message = ", msg);
+      console.log("data = ", data);
+      const username = data.username;
+      const message = data.message;
       setChatMessages((prev) => [...prev, { username, message }]);
     });
 
@@ -67,10 +75,10 @@ const Game = ({ username, roomId }) => {
     };
   }, [roomId, username]);
 
-  const handleSendMessage = (msg) => {
-    socket.emit('chatMessage', {username, msg, roomId});
+  const handleSendMessage = (message, sendTo) => {
+    socket.emit('chatMessage', {username, message, roomId, sendTo});
     console.log("emitted to server");
-    setChatMessages((prev) => [...prev, { username, message: msg }]);
+    setChatMessages((prev) => [...prev, { username, message }]);
   };
 
   const handleStartGame = () => {
